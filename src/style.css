@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #app {
+    height: 100%;
+    margin: 0;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI',
+      Roboto, Helvetica, Arial, sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .toolbar-segment {
+    @apply flex flex-wrap items-center gap-1.5 rounded-[22px] border border-white/50 bg-white/45 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur dark:border-slate-500/25 dark:bg-slate-800/45 dark:shadow-[inset_0_1px_0_rgba(148,163,184,0.15)];
+  }
+
+  .toolbar-btn {
+    @apply rounded-2xl border border-white/65 bg-white/75 px-3 py-1.5 text-xs font-semibold tracking-tight text-slate-700 shadow-[0_3px_10px_-8px_rgba(15,23,42,0.45)] backdrop-blur transition-all duration-200 ease-out hover:-translate-y-px hover:border-slate-300/70 hover:bg-white/95 hover:shadow-[0_8px_18px_-12px_rgba(15,23,42,0.5)] dark:border-slate-500/35 dark:bg-slate-800/75 dark:text-slate-200 dark:hover:border-slate-400/55 dark:hover:bg-slate-700/85;
+  }
+
+  .toolbar-btn-primary {
+    @apply rounded-2xl bg-gradient-to-b from-blue-500 to-blue-600 px-3 py-1.5 text-xs font-semibold tracking-tight text-white shadow-[0_8px_18px_-10px_rgba(37,99,235,0.6)] transition-all duration-200 ease-out hover:-translate-y-px hover:from-blue-400 hover:to-blue-500 hover:shadow-[0_12px_24px_-14px_rgba(37,99,235,0.7)];
+  }
+
+  .toolbar-btn-icon {
+    @apply inline-flex min-w-[64px] flex-col items-center justify-center gap-0.5 px-2.5 py-1.5 leading-none;
+  }
+
+  .toolbar-icon {
+    @apply h-4 w-4 opacity-90;
+  }
+
+  .toolbar-btn-label {
+    @apply text-[10px] font-semibold tracking-[0.01em];
+  }
+}
