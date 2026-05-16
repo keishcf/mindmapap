@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
   node: {
@@ -25,18 +25,57 @@ const emit = defineEmits([
   'drag-start',
   'drag',
   'drag-end',
+  'resize',
 ])
 
 const localText = ref(props.node.text)
 const dragging = ref(false)
 const textAreaRef = ref(null)
+const articleRef = ref(null)
+
+const autoSizeTextArea = () => {
+  const el = textAreaRef.value
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = `${el.scrollHeight}px`
+}
 
 watch(
   () => props.node.text,
   (value) => {
     localText.value = value
+    nextTick(autoSizeTextArea)
   },
 )
+
+watch(localText, () => {
+  nextTick(autoSizeTextArea)
+})
+
+let resizeObserver = null
+
+onMounted(() => {
+  autoSizeTextArea()
+  if (typeof ResizeObserver === 'undefined' || !articleRef.value) return
+  resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const { width, height } = entry.contentRect
+      emit('resize', {
+        id: props.node.id,
+        width: width + 2,
+        height: height + 2,
+      })
+    }
+  })
+  resizeObserver.observe(articleRef.value)
+})
+
+onBeforeUnmount(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+})
 
 const nodeClasses = computed(() => [
   'absolute w-56 align-middle rounded-2xl border p-4 text-center shadow-sm backdrop-blur transition-all duration-200 ease-in-out',
@@ -137,6 +176,7 @@ watch(
 
 <template>
   <article
+    ref="articleRef"
     :class="[...nodeClasses, 'group']"
     :style="[nodeStyle, { transform: `translate(${node.x}px, ${node.y}px)` }]"
     tabindex="0"
@@ -149,9 +189,10 @@ watch(
     <textarea
       ref="textAreaRef"
       v-model="localText"
-      rows="2"
-      class="w-full h-[29px] align-middle resize-none border-none bg-transparent p-0 text-center text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
+      rows="1"
+      class="block w-full resize-none overflow-hidden border-none bg-transparent p-0 text-center text-sm font-medium leading-snug text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
       placeholder="Untitled idea"
+      @input="autoSizeTextArea"
       @focus="emit('select', node.id)"
       @blur="commitText"
       @keydown="onKeyDown"

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import MindMapNode from './MindMapNode.vue'
 
 const props = defineProps({
@@ -44,6 +44,14 @@ const translateX = ref(0)
 const translateY = ref(0)
 const panning = ref(false)
 const panPointerId = ref(null)
+const measuredSizes = reactive({})
+
+const getNodeWidth = (id) => measuredSizes[id]?.width ?? props.nodeWidth
+const getNodeHeight = (id) => measuredSizes[id]?.height ?? props.nodeHeight
+
+const onNodeResize = ({ id, width, height }) => {
+  measuredSizes[id] = { width, height }
+}
 
 const ZOOM_MIN = 0.4
 const ZOOM_MAX = 2
@@ -61,8 +69,8 @@ const worldBounds = computed(() => {
 
   const minX = Math.min(...props.nodes.map((node) => node.x))
   const minY = Math.min(...props.nodes.map((node) => node.y))
-  const maxX = Math.max(...props.nodes.map((node) => node.x + props.nodeWidth))
-  const maxY = Math.max(...props.nodes.map((node) => node.y + props.nodeHeight))
+  const maxX = Math.max(...props.nodes.map((node) => node.x + getNodeWidth(node.id)))
+  const maxY = Math.max(...props.nodes.map((node) => node.y + getNodeHeight(node.id)))
 
   const originX = minX - WORLD_PADDING
   const originY = minY - WORLD_PADDING
@@ -95,12 +103,14 @@ const resolveDirection = (edge, fromNode, toNode) => {
 }
 
 const getAnchor = (node, side) => {
-  const centerX = node.renderX + props.nodeWidth / 2
-  const centerY = node.renderY + props.nodeHeight / 2
+  const width = getNodeWidth(node.id)
+  const height = getNodeHeight(node.id)
+  const centerX = node.renderX + width / 2
+  const centerY = node.renderY + height / 2
   if (side === 'left') return { x: node.renderX, y: centerY }
-  if (side === 'right') return { x: node.renderX + props.nodeWidth, y: centerY }
+  if (side === 'right') return { x: node.renderX + width, y: centerY }
   if (side === 'top') return { x: centerX, y: node.renderY }
-  return { x: centerX, y: node.renderY + props.nodeHeight }
+  return { x: centerX, y: node.renderY + height }
 }
 
 const oppositeSide = (side) => {
@@ -203,8 +213,8 @@ const centerView = () => {
   if (!rootNode) return
 
   scale.value = 1
-  translateX.value = rect.width / 2 - (rootNode.renderX + props.nodeWidth / 2)
-  translateY.value = rect.height / 2 - (rootNode.renderY + props.nodeHeight / 2)
+  translateX.value = rect.width / 2 - (rootNode.renderX + getNodeWidth(rootNode.id) / 2)
+  translateY.value = rect.height / 2 - (rootNode.renderY + getNodeHeight(rootNode.id) / 2)
 }
 
 onMounted(() => {
@@ -271,6 +281,7 @@ defineExpose({
           @add-sibling="emit('add-sibling', $event)"
           @delete-node="emit('delete-node', $event)"
           @drag="onNodeDrag"
+          @resize="onNodeResize"
         />
       </div>
     </div>
