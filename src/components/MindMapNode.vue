@@ -78,7 +78,7 @@ onBeforeUnmount(() => {
 })
 
 const nodeClasses = computed(() => [
-  'absolute w-56 align-middle rounded-2xl border p-4 text-center shadow-sm backdrop-blur transition-all duration-200 ease-in-out',
+  'absolute w-56 align-middle rounded-2xl border p-4 text-center shadow-sm transition-all duration-200 ease-in-out',
   'hover:shadow-md hover:-translate-y-0.5',
   props.selected
     ? 'ring-2 ring-blue-400/60 shadow-md'
